@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         initializer.initialize();
     }
 
-    private class CommHandler extends Handler {
+    private static class CommHandler extends Handler {
         WeakReference<MainActivity> ref;
 
         CommHandler(MainActivity activity) {
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 case Agent.MSG_RECEIVED:
                     activity.showMessage((ChatMessage) msg.obj);
                     if(((ChatMessage) msg.obj).sound==1){
-                        soundPlayer.playConnected();
+                        activity.sound();
                     }
                     break;
             }
@@ -290,6 +290,10 @@ public class MainActivity extends AppCompatActivity {
         chatLogAdapter.add(message);
         chatLogAdapter.notifyDataSetChanged();
         logview.smoothScrollToPosition(chatLogAdapter.getCount());
+    }
+
+    private void sound() {
+        soundPlayer.playConnected();
     }
 
     private void disconnect() {
