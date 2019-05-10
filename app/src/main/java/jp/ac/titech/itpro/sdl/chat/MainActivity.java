@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView logview;
     private EditText input;
     private Button button;
+    private Button soundbutton;
 
     private final ArrayList<ChatMessage> chatLog = new ArrayList<>();
     private ArrayAdapter<ChatMessage> chatLogAdapter;
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         progress = findViewById(R.id.main_progress);
         input = findViewById(R.id.main_input);
         button = findViewById(R.id.main_button);
+        soundbutton = findViewById(R.id.button);
 
         chatLogAdapter = new ArrayAdapter<ChatMessage>(this, 0, chatLog) {
             @Override
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         initializer.initialize();
     }
 
-    private static class CommHandler extends Handler {
+    private class CommHandler extends Handler {
         WeakReference<MainActivity> ref;
 
         CommHandler(MainActivity activity) {
@@ -146,6 +148,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case Agent.MSG_RECEIVED:
                     activity.showMessage((ChatMessage) msg.obj);
+                    if(((ChatMessage) msg.obj).sound==1){
+                        soundPlayer.playConnected();
+                    }
                     break;
             }
         }
@@ -228,7 +233,24 @@ public class MainActivity extends AppCompatActivity {
         }
         messageSeq++;
         long time = System.currentTimeMillis();
-        ChatMessage message = new ChatMessage(messageSeq, time, content, adapter.getName());
+        ChatMessage message = new ChatMessage(messageSeq, time, content, adapter.getName(),0);
+        agent.send(message);
+        chatLogAdapter.add(message);
+        chatLogAdapter.notifyDataSetChanged();
+        logview.smoothScrollToPosition(chatLog.size());
+        input.getEditableText().clear();
+    }
+
+    public void onClickButton(View v){
+        Log.d(TAG, "onClickSoundButton");
+
+        String content = input.getText().toString().trim();
+        if (content.isEmpty()) {
+            Toast.makeText(this, R.string.toast_empty_message, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        long time = System.currentTimeMillis();
+        ChatMessage message = new ChatMessage(messageSeq, time, content, adapter.getName(),1);
         agent.send(message);
         chatLogAdapter.add(message);
         chatLogAdapter.notifyDataSetChanged();
@@ -244,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
         this.state = state;
         input.setEnabled(state == State.Connected);
         button.setEnabled(state == State.Connected);
+        soundbutton.setEnabled(state == State.Connected);
         switch (state) {
         case Initializing:
         case Disconnected:
