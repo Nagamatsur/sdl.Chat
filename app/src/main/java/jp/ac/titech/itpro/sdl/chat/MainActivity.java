@@ -245,10 +245,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onClickSoundButton");
 
         String content = input.getText().toString().trim();
-        if (content.isEmpty()) {
-            Toast.makeText(this, R.string.toast_empty_message, Toast.LENGTH_SHORT).show();
-            return;
-        }
         long time = System.currentTimeMillis();
         ChatMessage message = new ChatMessage(messageSeq, time, content, adapter.getName(),1);
         agent.send(message);
